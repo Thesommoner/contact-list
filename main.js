@@ -1,4 +1,5 @@
-let contacts = []
+let contacts = [];
+
 
 /**
  * Called when submitting the new Contact Form
@@ -10,13 +11,28 @@ let contacts = []
  * *** push: resources/push.jpg
  */
 function addContact(event) {
+  event.preventDefault()
+  let form = event.target
+
+  let contact = {
+    id: generateId(),
+    name: form.name.value,
+    number: form.number.value,
+    emergency: form.emergency.checked
+  }
+
+  contacts.push(contact)
+  saveContacts()
+  form.reset()
 }
 
-/**
+/**.
  * Converts the contacts array to a JSON string then
  * Saves the string to localstorage at the key contacts 
  */
 function saveContacts() {
+  window.localStorage.setItem("contacts", JSON.stringify(contacts))
+  drawContacts()
 }
 
 /**
@@ -25,6 +41,10 @@ function saveContacts() {
  * the contacts array to the retrieved array
  */
 function loadContacts() {
+  let contactList = JSON.parse(window.localStorage.getItem("contacts"))
+  if (contactList){
+    contacts = contactList
+  }
 }
 
 /**
@@ -33,6 +53,18 @@ function loadContacts() {
  * contacts in the contacts array
  */
 function drawContacts() {
+  let contactListElement = document.getElementById("contact-list")
+  let contactsTemplate = ""
+  contacts.forEach(contact => {
+    contactsTemplate += `
+    <div class="contact-card ${contact.emergency ? 'emergency-contact' : ''}">
+        <h3>${contact.name}</h3>
+        <p>${contact.number}</p>
+        <button type="button" onclick="removeContact('${contact.id}')">remove</button>
+      </div>
+      `
+    })
+    contactListElement.innerHTML = contactsTemplate
 }
 
 /**
@@ -45,12 +77,21 @@ function drawContacts() {
  * @param {string} contactId 
  */
 function removeContact(contactId) {
+  let index = contacts.findIndex(contact => contact.id == contact.id)
+  if (index == -1){
+    throw new Error("Invalid Contact ID")
+  }
+  contacts.splice(index, 1)
+  saveContacts()
 }
 
-/**
+/**!!!!!
  * Toggles the visibility of the AddContact Form
  */
 function toggleAddContactForm() {
+  let toggle = document.getElementById("new-contact-form")
+    toggle.classList.toggle("hidden")
+
 }
 
 
